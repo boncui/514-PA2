@@ -47,7 +47,6 @@ def preprocess_data(data):
 training_data_preprocessed = preprocess_data(training_data)
 testing_data_preprocessed = preprocess_data(testing_data)
 
-# Display the first few rows of the preprocessed training data
+#Final Preprocessed DATA
 print(training_data_preprocessed.head())
-# Display the first few rows of the preprocessed testing data
 print(testing_data_preprocessed.head())
