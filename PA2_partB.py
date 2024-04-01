@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+from sklearn.model_selection import cross_val_score
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import KFold
+from sklearn.ensemble import RandomForestClassifier
 
   
 """
@@ -47,6 +50,79 @@ def preprocess_data(data):
 training_data_preprocessed = preprocess_data(training_data)
 testing_data_preprocessed = preprocess_data(testing_data)
 
-#Final Preprocessed DATA
-print(training_data_preprocessed.head())
-print(testing_data_preprocessed.head())
+# #Final Preprocessed DATA
+# print(training_data_preprocessed.head())
+# print(testing_data_preprocessed.head())
+
+"""Decision Tree"""
+#using traingin dataset
+X_train = training_data_preprocessed.drop('Class', axis=1)
+y_train = training_data_preprocessed['Class']
+
+# Set up KFold for cross-validation
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+# List to store results for different hyperparameters
+max_depth_values = [5, 10, 15, 20, None]  # None means no limit on the depth of the tree
+avg_scores = []
+
+# Loop over hyperparameter values
+for max_depth in max_depth_values:
+    # Initialize the model with the current hyperparameter value
+    model = DecisionTreeClassifier(max_depth=max_depth, random_state=42)
+    
+    # Perform 5-fold cross-validation and store the scores
+    scores = cross_val_score(model, X_train, y_train, cv=kf, scoring='accuracy')
+    
+    # Compute the average accuracy and store it
+    avg_score = np.mean(scores)
+    avg_scores.append(avg_score)
+    
+    # Print the results
+    print(f"Average Accuracy for max_depth={max_depth}: {avg_score:.4f}")
+
+# Find the best hyperparameter value
+best_index = np.argmax(avg_scores)
+best_max_depth = max_depth_values[best_index]
+print(f"Best max_depth value: {best_max_depth}")
+
+#Random Forest
+# Define hyperparameters to test
+n_estimators_values = [50, 100, 200, 300]
+avg_scores_rf = []
+
+# Loop over hyperparameter values
+for n_estimators in n_estimators_values:
+    # Initialize the model with the current hyperparameter value
+    rf_model = RandomForestClassifier(n_estimators=n_estimators, random_state=42)
+    
+    # Perform 5-fold cross-validation and store the scores
+    rf_scores = cross_val_score(rf_model, X_train, y_train, cv=kf, scoring='accuracy')
+    
+    # Compute the average accuracy and store it
+    rf_avg_score = np.mean(rf_scores)
+    avg_scores_rf.append(rf_avg_score)
+    
+    print(f"Average Accuracy for n_estimators={n_estimators}: {rf_avg_score:.4f}")
+
+# Find the best hyperparameter value
+best_index_rf = np.argmax(avg_scores_rf)
+best_n_estimators = n_estimators_values[best_index_rf]
+print(f"Best n_estimators value for Random Forest: {best_n_estimators}")
+
+
+# #PLots
+# # Plot for Decision Tree
+# plt.figure(figsize=(10, 5))
+# plt.plot(max_depth_values, avg_scores, marker='o', linestyle='-', color='b', label='Decision Tree')
+
+# # Plot for Random Forest
+# plt.plot(n_estimators_values, avg_scores_rf, marker='s', linestyle='--', color='g', label='Random Forest')
+
+# plt.xlabel('Hyperparameter Value')
+# plt.ylabel('Average Accuracy')
+# plt.title('5-Fold Cross-Validation Results')
+# plt.legend()
+# plt.grid(True)
+
+# plt.show()
